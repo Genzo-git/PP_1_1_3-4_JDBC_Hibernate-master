@@ -7,133 +7,183 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class UserDaoJDBCImpl extends Util implements UserDao {
+public class UserDaoJDBCImpl implements UserDao {
+
+    private Connection connection = null;
+    private Statement statement = null;
 
     public UserDaoJDBCImpl() {
 
     }
 
-    Connection connection = getConnection();
+    @Override
+    public void createUsersTable() {
 
-    public void createUsersTable() throws SQLException {
-
-        String sql = """
-                alter table users
-                        add id int auto_increment;
-
-                        alter table users
-                        add name varchar(45) null;
-
-                        alter table users
-                        add lastName varchar(45) null;
-
-                        alter table users
-                        add age tinyint null;""";
-
-        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-            preparedStatement.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            if (connection != null) {
-                connection.close();
-            }
-        }
-
-    }
-
-    public void dropUsersTable() throws SQLException {
-        String sql = "DROP TABLE USERS";
-
-        try (Statement statement = connection.createStatement()) {
-            statement.execute(sql);
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            if (connection != null) {
-                connection.close();
-            }
-        }
-
-
-    }
-
-    public void saveUser(String name, String lastName, byte age) throws SQLException {
-        PreparedStatement preparedStatement = null;
-        String sql = "INSERT INTO users (name, lastName, age) VALUES (?, ?, ?)";
         try {
-            preparedStatement = connection.prepareStatement(sql);
+            connection = Util.getConnection();
+            connection.setAutoCommit(false);
+            statement = connection.createStatement();
+            statement.executeUpdate("CREATE TABLE if not exists users(" +
+                    "id integer primary key auto_increment, " +
+                    "name varchar(45) not null, " +
+                    "lastname varchar(45) not null, " +
+                    "age tinyint not null );");
+            connection.commit();
+            statement.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            try {
+                connection.rollback();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+        } finally {
+            try {
+                connection.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
+    }
+
+    @Override
+    public void dropUsersTable() {
+        try {
+            connection = Util.getConnection();
+            connection.setAutoCommit(false);
+            statement = connection.createStatement();
+            statement.executeUpdate("DROP TABLE IF EXISTS users;");
+            connection.commit();
+            statement.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            try {
+                connection.rollback();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+        } finally {
+            try {
+                connection.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    @Override
+    public void saveUser(String name, String lastName, byte age) {
+        try {
+            connection = Util.getConnection();
+            connection.setAutoCommit(false);
+            PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO users(name, lastname, age)  values (?,?,?)");
             preparedStatement.setString(1, name);
             preparedStatement.setString(2, lastName);
             preparedStatement.setByte(3, age);
-            preparedStatement.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            if (preparedStatement != null) {
+            preparedStatement.execute();
+            connection.commit();
             preparedStatement.close();
-            }
-            if (connection != null) {
-                connection.close();
-            }
-        }
-
-    }
-
-    public void removeUserById(long id) throws SQLException {
-
-        String sql = "DELETE FROM USERS WHERE ID = ?";
-        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-            preparedStatement.setLong(1, id);
-            preparedStatement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
+            try {
+                connection.rollback();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
         } finally {
-            if (connection != null) {
+            try {
                 connection.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
         }
-
     }
 
-    public List<User> getAllUsers() throws SQLException {
+    @Override
+    public void removeUserById(long id) {
+
+        try {
+            connection = Util.getConnection();
+            connection.setAutoCommit(false);
+            statement = connection.createStatement();
+            statement.executeUpdate("DELETE FROM users WHERE  id =" + id + ";");
+            connection.commit();
+            statement.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            try {
+                connection.rollback();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+        } finally {
+            try {
+                connection.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    @Override
+    public List<User> getAllUsers() {
         List<User> userList = new ArrayList<>();
-        String sql = "SELECT ID, NAME, LASTNAME, AGE FROM USERS";
-        try (Statement statement = connection.createStatement()) {
-            ResultSet resultSet = statement.executeQuery(sql);
-
+        try {
+            connection = Util.getConnection();
+            statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery("SELECT * FROM users");
             while (resultSet.next()) {
-                User user = new User();
-                user.setId(resultSet.getLong("ID"));
-                user.setName(resultSet.getString("NAME"));
-                user.setLastName(resultSet.getString("LASTNAME"));
-                user.setAge(resultSet.getByte("AGE"));
-
+                Long id = resultSet.getLong("id");
+                String name = resultSet.getString("name");
+                String lastName = resultSet.getString("lastName");
+                Byte age = resultSet.getByte("age");
+                User user = new User(name, lastName, age);
+                user.setId(id);
                 userList.add(user);
             }
+            statement.close();
+            resultSet.close();
+            return userList;
         } catch (SQLException e) {
             e.printStackTrace();
+            try {
+                connection.rollback();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
         } finally {
-            if (connection != null) {
+            try {
                 connection.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
         }
-
         return userList;
     }
 
-    public void cleanUsersTable() throws SQLException {
-        // попробую проще
-        try (Statement statement = connection.createStatement()) {
-            statement.executeUpdate("TRUNCATE USERS");
-        } catch (SQLException e) {
+    @Override
+    public void cleanUsersTable() {
+        try {
+            connection = Util.getConnection();
+            connection.setAutoCommit(false);
+            statement = connection.createStatement();
+            statement.executeUpdate("TRUNCATE users");
+            connection.commit();
+            statement.close();
+        } catch (Exception e) {
             e.printStackTrace();
+            try {
+                connection.rollback();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
         } finally {
-            if (connection != null) {
+            try {
                 connection.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
         }
-
     }
 }

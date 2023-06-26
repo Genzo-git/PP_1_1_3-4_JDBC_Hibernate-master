@@ -9,33 +9,38 @@ import java.util.List;
 
 public class UserServiceImpl implements UserService {
 
-    UserDao userDao = new UserDaoJDBCImpl();
-
-    public void createUsersTable() throws SQLException {
-        userDao.createUsersTable();
+    public UserServiceImpl() {
 
     }
 
-    public void dropUsersTable() throws SQLException {
-        userDao.dropUsersTable();
+    @Override
+    public void createUsersTable() {
+        new UserDaoJDBCImpl().createUsersTable();
     }
 
-    public void saveUser(String name, String lastName, byte age) throws SQLException {
-        userDao.saveUser(name, lastName, age);
-
+    @Override
+    public void dropUsersTable() {
+        new UserDaoJDBCImpl().dropUsersTable();
     }
 
-    public void removeUserById(long id) throws SQLException {
-        userDao.removeUserById(id);
-
+    @Override
+    public void saveUser(String name, String lastName, byte age) {
+        new UserDaoJDBCImpl().saveUser(name, lastName, age);
     }
 
-    public List<User> getAllUsers() throws SQLException {
-        return userDao.getAllUsers();
+    @Override
+    public void removeUserById(long id) {
+        new UserDaoJDBCImpl().removeUserById(id);
     }
 
-    public void cleanUsersTable() throws SQLException {
-        userDao.cleanUsersTable();
-
+    @Override
+    public List<User> getAllUsers() {
+        return new UserDaoJDBCImpl().getAllUsers();
     }
+
+    @Override
+    public void cleanUsersTable() {
+        new UserDaoJDBCImpl().cleanUsersTable();
+    }
+
 }
