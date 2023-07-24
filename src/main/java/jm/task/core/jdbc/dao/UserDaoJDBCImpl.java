@@ -1,25 +1,22 @@
 package jm.task.core.jdbc.dao;
 
 import jm.task.core.jdbc.model.User;
-import jm.task.core.jdbc.util.Util;
 
-import java.sql.*;
-import java.util.ArrayList;
 import java.util.List;
 
 public class UserDaoJDBCImpl implements UserDao {
 
-    private Connection connection = null;
-    private Statement statement = null;
+    //private Connection connection = null;
+    //private Statement statement = null;
 
     public UserDaoJDBCImpl() {
 
     }
 
-    @Override
+    //@Override
     public void createUsersTable() {
 
-        try {
+       /* try {
             connection = Util.getConnection();
             connection.setAutoCommit(false);
             statement = connection.createStatement();
@@ -43,13 +40,13 @@ public class UserDaoJDBCImpl implements UserDao {
             } catch (SQLException e) {
                 e.printStackTrace();
             }
-        }
+        }*/
 
     }
 
     @Override
     public void dropUsersTable() {
-        try {
+        /*try {
             connection = Util.getConnection();
             connection.setAutoCommit(false);
             statement = connection.createStatement();
@@ -69,12 +66,12 @@ public class UserDaoJDBCImpl implements UserDao {
             } catch (SQLException e) {
                 e.printStackTrace();
             }
-        }
+        }*/
     }
 
     @Override
     public void saveUser(String name, String lastName, byte age) {
-        try {
+       /* try {
             connection = Util.getConnection();
             connection.setAutoCommit(false);
             PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO users(name, lastname, age)  values (?,?,?)");
@@ -97,13 +94,13 @@ public class UserDaoJDBCImpl implements UserDao {
             } catch (SQLException e) {
                 e.printStackTrace();
             }
-        }
+        }*/
     }
 
     @Override
     public void removeUserById(long id) {
 
-        try {
+        /*try {
             connection = Util.getConnection();
             connection.setAutoCommit(false);
             statement = connection.createStatement();
@@ -123,12 +120,12 @@ public class UserDaoJDBCImpl implements UserDao {
             } catch (SQLException e) {
                 e.printStackTrace();
             }
-        }
+        }*/
     }
 
     @Override
     public List<User> getAllUsers() {
-        List<User> userList = new ArrayList<>();
+       /* List<User> userList = new ArrayList<>();
         try {
             connection = Util.getConnection();
             statement = connection.createStatement();
@@ -159,12 +156,13 @@ public class UserDaoJDBCImpl implements UserDao {
                 e.printStackTrace();
             }
         }
-        return userList;
+        return userList;*/
+        return null;
     }
 
     @Override
     public void cleanUsersTable() {
-        try {
+        /*try {
             connection = Util.getConnection();
             connection.setAutoCommit(false);
             statement = connection.createStatement();
@@ -184,6 +182,6 @@ public class UserDaoJDBCImpl implements UserDao {
             } catch (SQLException e) {
                 e.printStackTrace();
             }
-        }
+        }*/
     }
 }
