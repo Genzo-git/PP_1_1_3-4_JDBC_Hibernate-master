@@ -11,7 +11,6 @@ public class UserServiceImpl implements UserService {
     public UserServiceImpl() {
 
     }
-    //Service на этот раз использует реализацию dao через Hibernate
 
     @Override
     public void createUsersTable() {
